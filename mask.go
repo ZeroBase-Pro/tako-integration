@@ -2,12 +2,13 @@ package tako_gnark_ecdsa
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/std/algebra/emulated/sw_emulated"
 	"github.com/consensys/gnark/std/evmprecompiles"
 	"github.com/consensys/gnark/std/math/emulated"
 	"github.com/consensys/gnark/std/math/uints" // 用于处理字节数组
-	"log"
 )
 
 type MaskCircuit struct {
@@ -46,9 +47,10 @@ func (circuit *MaskCircuit) Define(api frontend.API) error {
 	for i := 0; i < 20; i++ {
 		addressBytes[i] = pubBytes_hash[i+12].Val
 	}
-	//fixme add address to path[0], waiting gnark fix bug
+	addr_fv := BigEndianBytesToVar(api, addressBytes)
 	merklePath := make([]frontend.Variable, 14)
-	for i := 0; i < len(merklePath); i++ {
+	merklePath[0] = addr_fv
+	for i := 1; i < len(merklePath); i++ {
 		merklePath[i] = circuit.Path[i]
 	}
 
@@ -56,6 +58,5 @@ func (circuit *MaskCircuit) Define(api frontend.API) error {
 	if err != nil {
 		log.Printf("MerkleTreeVerify %s", err)
 	}
-	//
 	return nil
 }

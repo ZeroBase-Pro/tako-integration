@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/consensys/gnark-crypto/ecc/secp256k1/ecdsa"
+	"github.com/consensys/gnark/frontend"
 	"github.com/ethereum/go-ethereum/crypto/secp256k1"
 	"golang.org/x/crypto/sha3"
 	"log"
@@ -60,4 +61,18 @@ func isValidEthereumPrivateKey(hexKey string) bool {
 	}
 
 	return true
+}
+
+// 解析成一个 frontend.Variable 表示的大整数（位于同一有限域中）。
+func BigEndianBytesToVar(api frontend.API, data []frontend.Variable) frontend.Variable {
+	// x 初始化为 0
+	x := frontend.Variable(0)
+
+	// 大端序: data[0] 是最高字节, data[len-1] 是最低字节
+	for i := 0; i < 20; i++ {
+		// x = x * 256 + data[i]
+		x = api.Mul(x, frontend.Variable(256)) // 相当于左移 8 位
+		x = api.Add(x, data[i])
+	}
+	return x
 }

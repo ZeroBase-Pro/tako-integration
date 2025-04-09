@@ -2,23 +2,23 @@ package tako_gnark_ecdsa
 
 import (
 	"fmt"
-	"github.com/consensys/gnark/frontend"
-
 	poseidonbn254 "github.com/consensys/gnark-crypto/ecc/bn254/fr/poseidon2"
+	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/std/accumulator/merkle"
 	"github.com/consensys/gnark/std/hash"
+	"github.com/consensys/gnark/std/hash/mimc"
 	poseidon2_permutation "github.com/consensys/gnark/std/permutation/poseidon2"
 )
 
 func MerkleTreeVerify(api frontend.API, rootHash frontend.Variable, merklePath []frontend.Variable, proofIndex frontend.Variable) error {
-	hsh, err := NewMerkleDamgardHasher(api)
+	hsh, err := mimc.NewMiMC(api)
 	if err != nil {
 		return err
 	}
 	var M merkle.MerkleProof
 	M.RootHash = rootHash
 	M.Path = merklePath
-	M.VerifyProof(api, hsh, proofIndex)
+	M.VerifyProof(api, &hsh, proofIndex)
 	return nil
 }
 
